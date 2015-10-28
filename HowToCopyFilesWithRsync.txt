@@ -1,0 +1,76 @@
+  ____                     __ _ _                      _ _   _                                 
+ / ___|___  _ __  _   _   / _(_) | ___  ___  __      _(_) |_| |__    _ __ ___ _   _ _ __   ___ 
+| |   / _ \| '_ \| | | | | |_| | |/ _ \/ __| \ \ /\ / / | __| '_ \  | '__/ __| | | | '_ \ / __|
+| |__| (_) | |_) | |_| | |  _| | |  __/\__ \  \ V  V /| | |_| | | | | |  \__ \ |_| | | | | (__ 
+ \____\___/| .__/ \__, | |_| |_|_|\___||___/   \_/\_/ |_|\__|_| |_| |_|  |___/\__, |_| |_|\___|
+           |_|    |___/                                                       |___/            
+
+
+Let a be directory /tmp/content in local machine 
+Let b be directory /tmp/content in hello.com
+
+Copy content from a to b.
+
+First create content to a and b.
+
+$ mkdir -p /tmp/content/subdir && echo "1" > /tmp/content/file1 && echo "2" > /tmp/content/subdir/file2 && tree /tmp/content
+/tmp/content
+├── file1
+└── subdir
+    └── file2
+1 directory, 2 files
+
+$ ssh user@hello.com 'mkdir -p /tmp/content/subdir && echo "1" > /tmp/content/file1 && echo "3" > /tmp/content/file3 && tree /tmp/content'
+/tmp/content
+├── file1
+├── file3
+└── subdir
+1 directory, 2 files
+
+After copying b should contain these 2 files and one file2 from a.
+
+Check what rsync suggest to do with parameter --dry-run
+
+$ rsync -avzr --dry-run /tmp/content user@hello.com:/tmp
+sending incremental file list
+content/
+content/file1
+content/subdir/
+content/subdir/file2
+
+sent 153 bytes  received 33 bytes  53.14 bytes/sec
+total size is 4  speedup is 0.02 (DRY RUN)
+
+Execute copy (same command without --dry-run)
+
+$ rsync -avzr /tmp/content user@hello.com:/tmp
+
+Visualize contents of a and b after rsync copy.
+
+user@tesb-VirtualBox:~$ tree /tmp/content
+/tmp/content
+├── file1
+└── subdir
+    └── file2
+
+1 directory, 2 files
+
+$ ssh user@hello.com 'tree /tmp/content'
+/tmp/content
+├── file1
+├── file3
+└── subdir
+    └── file2
+
+1 directory, 3 files
+
+After copying from a to b
+	b should contain all files and directories as before copying
+		=> check
+	a should contain all files and directories as before copying
+		=> check
+	b should contain all files and directories as a
+		=> check
+
+
+
